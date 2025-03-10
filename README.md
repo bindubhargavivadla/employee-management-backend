@@ -14,7 +14,7 @@ It allows users to **add, update, delete, and view employees** using MySQL store
 ## Clone the Repository
 
 git clone https://github.com/bindubhargavivadla/employee-management-backend.git
-cd employee-management
+cd employee-management-frontend
 
 ## Install the dependencies
 - npm install
