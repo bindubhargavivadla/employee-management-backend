@@ -20,6 +20,7 @@ cd employee-management
 - npm install
 
 ## Set Up Environment Variables
+create a file .env and add below env variables
 DB_HOST=127.0.0.1
 DB_USER=root
 DB_PASSWORD=yourpassword
