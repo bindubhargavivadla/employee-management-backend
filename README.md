@@ -9,7 +9,7 @@ It allows users to **add, update, delete, and view employees** using MySQL store
 - **Frontend**: React.js, React Testing Library, Jest
 - **Testing**: Mocha, Chai, Supertest
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 ## Clone the Repository
 
