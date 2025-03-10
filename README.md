@@ -13,7 +13,7 @@ It allows users to **add, update, delete, and view employees** using MySQL store
 
 ## Clone the Repository
 
-git clone https://github.com/your-username/employee-management.git
+git clone https://github.com/bindubhargavivadla/employee-management-backend.git
 cd employee-management
 
 ## Install the dependencies
