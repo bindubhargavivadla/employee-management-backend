@@ -1,17 +1,11 @@
 const mysql = require("mysql2/promise");
 require("dotenv").config();
-
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER_NAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-});
+const sequelize = require("../config/database")
 
 exports.getAllEmployees = async (req, res) => {
   try {
-    const [rows] = await pool.query("CALL GetEmployees()");
-    res.json(rows[0]);
+    const rows = await sequelize.query("CALL GetEmployees()");
+    res.json(rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -20,11 +14,20 @@ exports.getAllEmployees = async (req, res) => {
 exports.createEmployee = async (req, res) => {
   const { firstName, lastName, email, position, age, salary } = req.body;
   try {
-    const [employee] = await pool.query("CALL FindEmployee(?)", [email]);
-    if (employee && employee[0].length) {
+    const employee = await sequelize.query("CALL FindEmployee(?)",
+      {replacements: [email]}
+    );
+    if (employee && employee.length) {
       throw Error(`Employee with EmailId: ${email} already exists`);
     }
-    await pool.query("CALL InsertEmployee(?, ?, ?, ?, ?, ?)", [firstName, lastName, email, position, age, salary]);
+
+    await sequelize.query(
+      "CALL InsertEmployee(:firstName, :lastName, :email, :position, :age, :salary)", 
+      {
+        replacements: { firstName, lastName, email, position, age, salary }
+      }
+    );
+
     res.status(201).json({ message: "Employee added successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -36,25 +39,40 @@ exports.createEmployee = async (req, res) => {
 exports.updateEmployee = async (req, res) => {
   const { firstName, lastName, email, position, age, salary } = req.body;
   const { id } = req.params;
+
   try {
-    const [employee] = await pool.query("CALL FindEmployeeById(?)", [id]);
-    if(employee && employee[0].length) {
-      await pool.query("CALL UpdateEmployee(?, ?, ?, ?, ?, ?, ?)", [id, firstName, lastName, email, position, age, salary]);
+    // Fetch employee by ID
+    const employee = await sequelize.query("CALL FindEmployeeById(?)", {
+      replacements: [id]
+    });
+
+    // Check if employee exists
+    if (employee && employee.length) {
+      await sequelize.query("CALL UpdateEmployee(?, ?, ?, ?, ?, ?, ?)", {
+        replacements: [id, firstName, lastName, email, position, age, salary]
+      });
+
       res.json({ message: "Employee updated successfully" });
     } else {
-      throw Error(`Employee not found`);
-    }    
+      res.status(404).json({ error: `Employee not found` });
+    }
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: error });
   }
 };
 
 exports.deleteEmployee = async (req, res) => {
   const { id } = req.params;
   try {
-    const [employee] = await pool.query("CALL FindEmployeeById(?)", [id]);
-    if(employee && employee[0].length) {
-      await pool.query("CALL DeleteEmployee(?)", [id]);
+    const employee = await sequelize.query("CALL FindEmployeeById(?)", {
+      replacements: [id]
+    });
+
+    if (employee && employee.length) {
+      await sequelize.query("CALL DeleteEmployee(?)", {
+        replacements: [id]
+      });
       res.json({ message: "Employee deleted successfully" });
     } else {
       throw Error(`Employee not found`);
